@@ -74,7 +74,7 @@ Vagrant.configure("2") do |config|
   end
 
 
-  # Load Balancer 3 (Web-Master)
+  # Load Balancer 3 (DB-Master)
   config.vm.define "loadbalancer3" do |lb3|
     lb3.vm.box = "bento/ubuntu-20.04"
     lb3.vm.network "private_network", ip: "192.168.50.30"
@@ -89,7 +89,7 @@ Vagrant.configure("2") do |config|
     lb3.vm.provision "shell", path: "scripts/setup_keepalived_master_db.sh"
   end
 
-  # Load Balancer 4 (Web-Backup)
+  # Load Balancer 4 (DB-Backup)
   config.vm.define "loadbalancer4" do |lb4|
     lb4.vm.box = "bento/ubuntu-20.04"
     lb4.vm.network "private_network", ip: "192.168.50.40"

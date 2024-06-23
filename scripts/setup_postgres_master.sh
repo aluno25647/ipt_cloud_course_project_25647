@@ -15,8 +15,9 @@ max_wal_senders = 3
 wal_keep_segments = 64
 EOF"
 
+# Replicação
 sudo bash -c "cat >> /etc/postgresql/12/main/pg_hba.conf <<EOF
-host replication postgres 192.168.50.0/32 md5
+host replication postgres 192.168.50.0/24 md5
 host all all 0.0.0.0/0 md5
 EOF"
 
