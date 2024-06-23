@@ -106,12 +106,12 @@ Vagrant.configure("2") do |config|
 
 
   # DB Master
-  config.vm.define "db_master" do |master|
+  config.vm.define "dbmaster" do |master|
     master.vm.box = "bento/ubuntu-20.04"
     master.vm.network "private_network", ip: "192.168.50.31"
-    master.vm.hostname = "db_master"
+    master.vm.hostname = "dbmaster"
     master.vm.provider "virtualbox" do |v|
-      v.name = "Project_A-db_master"
+      v.name = "Project_A-dbmaster"
       v.memory = 1024
       v.cpus = 2
       v.linked_clone = true
@@ -120,12 +120,12 @@ Vagrant.configure("2") do |config|
   end
 
  # DB Slave 1
-  config.vm.define "db_slave1" do |slave1|
+  config.vm.define "dbslave1" do |slave1|
     slave1.vm.box = "bento/ubuntu-20.04"
     slave1.vm.network "private_network", ip: "192.168.50.32"
-    slave1.vm.hostname = "db_slave1"
+    slave1.vm.hostname = "dbslave1"
     slave1.vm.provider "virtualbox" do |v|
-      v.name = "Project_A-db_slave1"
+      v.name = "Project_A-dbslave1"
       v.memory = 1024
       v.cpus = 2
       v.linked_clone = true
@@ -134,12 +134,12 @@ Vagrant.configure("2") do |config|
   end
 
   # DB Slave 2
-  config.vm.define "db_slave2" do |slave2|
+  config.vm.define "dbslave2" do |slave2|
     slave2.vm.box = "bento/ubuntu-20.04"
     slave2.vm.network "private_network", ip: "192.168.50.33"
-    slave2.vm.hostname = "db_slave2"
+    slave2.vm.hostname = "dbslave2"
     slave2.vm.provider "virtualbox" do |v|
-      v.name = "Project_A-db_slave2"
+      v.name = "Project_A-dbslave2"
       v.memory = 1024
       v.cpus = 2
       v.linked_clone = true
