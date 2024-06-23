@@ -85,9 +85,8 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
       v.linked_clone = true
     end
-    
-    ## TODO
-
+    lb3.vm.provision "shell", path: "scripts/setup_loadbalancer_db.sh"
+    lb3.vm.provision "shell", path: "scripts/setup_keepalived_master_db.sh"
   end
 
   # Load Balancer 4 (Web-Backup)
@@ -101,9 +100,8 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
       v.linked_clone = true
     end
-    
-     ## TODO
-
+    lb4.vm.provision "shell", path: "scripts/setup_loadbalancer_db.sh"
+    lb4.vm.provision "shell", path: "scripts/setup_keepalived_backup_db.sh"
   end
 
 
