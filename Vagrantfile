@@ -26,6 +26,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 1
     end
     redis.vm.provision "shell", path: "scripts/setup_redis.sh"
+    redis.vm.provision "shell", path: "scripts/setup_redis_exporter.sh"
   end
 
   # Web Servers
@@ -39,7 +40,32 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       ws.vm.provision "shell", path: "./scripts/setup_webserver.sh"
+      ws.vm.provision "shell", path: "scripts/setup_node_exporter.sh"
     end
   end
+
+    # Prometheus Server
+    config.vm.define "prometheus" do |prom|
+      prom.vm.hostname = "prometheus"
+      prom.vm.network "private_network", ip: "192.168.44.20"
+      prom.vm.provider "virtualbox" do |v|
+        v.name = "Project_A-prometheus"
+        v.memory = 1048
+        v.cpus = 2
+      end
+      prom.vm.provision "shell", path: "scripts/setup_prometheus.sh"
+    end
+  
+    # Grafana Server
+    config.vm.define "grafana" do |grafana|
+      grafana.vm.hostname = "grafana"
+      grafana.vm.network "private_network", ip: "192.168.44.30"
+      grafana.vm.provider "virtualbox" do |v|
+        v.name = "Project_A-grafana"
+        v.memory = 1048
+        v.cpus = 2
+      end
+      grafana.vm.provision "shell", path: "scripts/setup_grafana.sh"
+    end
 
 end
