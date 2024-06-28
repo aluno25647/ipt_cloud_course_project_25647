@@ -1,6 +1,9 @@
 <?php
 include '_dotenv.php';
 
+ini_set('session.save_handler', 'redis');
+ini_set('session.save_path', 'tcp://192.168.44.10:6379');
+
 session_set_cookie_params(86400); // Set the session cookie's lifetime to 24 hours (in seconds)
 session_start();
 

@@ -25,7 +25,8 @@ sudo apt-get install -y \
     php8.1-xml \
     php8.1-bcmath \
     zip \
-    unzip
+    unzip \
+    php-redis   # Install Redis PHP extension
 
 sudo systemctl restart apache2
 
@@ -52,5 +53,12 @@ echo -e "$MSG_COLOR$(hostname): Update deploy date @ .env file\033[0m"
 cd /vagrant/app
 ISO_DATE=$(TZ=Europe/Lisbon date -Iseconds)
 sed -i "s/^DEPLOY_DATE=.*/DEPLOY_DATE=\"$ISO_DATE\"/" .env
+
+echo -e "$MSG_COLOR$(hostname): Configure PHP session to use Redis\033[0m"
+sudo sed -i 's/^;session.save_handler = files/session.save_handler = redis/' /etc/php/8.1/apache2/php.ini
+sudo sed -i 's/^;session.save_path = "\/var\/lib\/php\/sessions"/session.save_path = "tcp:\/\/192.168.44.10:6379"/' /etc/php/8.1/apache2/php.ini
+
+echo -e "$MSG_COLOR$(hostname): Restart Apache to apply changes\033[0m"
+sudo systemctl restart apache2
 
 echo -e "$MSG_COLOR$(hostname): Finished!\033[0m"
