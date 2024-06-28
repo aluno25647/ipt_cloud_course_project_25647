@@ -53,4 +53,4 @@ cd /vagrant/app
 ISO_DATE=$(TZ=Europe/Lisbon date -Iseconds)
 sed -i "s/^DEPLOY_DATE=.*/DEPLOY_DATE=\"$ISO_DATE\"/" .env
 
-echo -e "$MSG_COLOR$(hostname): Finished! Visit http://192.168.44.10\033[0m"
+echo -e "$MSG_COLOR$(hostname): Finished!\033[0m"
