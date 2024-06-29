@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       lb.vm.provision "shell", path: "./scripts/loadbalancer/setup_loadbalancer.sh", args: ["#{i}"]
-      lb.vm.provision "shell", path: "./scripts/loadbalancer/setup_nginx_exporter.sh"
+      lb.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
     end
   end
 
@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       ws.vm.provision "shell", path: "./scripts/webserver/setup_webserver.sh"
-      ws.vm.provision "shell", path: "./scripts/webserver/setup_node_exporter.sh"
+      ws.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
     end
   end
 
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 1
     end
     redis.vm.provision "shell", path: "./scripts/redis/setup_redis.sh"
-    redis.vm.provision "shell", path: "./scripts/redis/setup_redis_exporter.sh"
+    redis.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
   end
 
   # Prometheus Server

@@ -17,11 +17,11 @@ scrape_configs:
 
   - job_name: 'redis_server'
     static_configs:
-      - targets: ['192.168.44.10:9104']
+      - targets: ['192.168.44.10:9100']
 
   - job_name: 'nginx_loadbalancers'
     static_configs:
-      - targets: ['192.168.50.10:9913', '192.168.50.20:9913']
+      - targets: ['192.168.50.10:9100', '192.168.50.20:9100']
 EOF
 
 # Criar o serviço do Prometheus para iniciar automaticamente
