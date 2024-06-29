@@ -11,16 +11,6 @@ if ! id grafana &>/dev/null; then
     sudo useradd --system --home /var/lib/grafana --shell /bin/false grafana
 fi
 
-# Create necessary directories for provisioning
-sudo mkdir -p /opt/grafana/provisioning/datasources
-sudo mkdir -p /opt/grafana/provisioning/dashboards
-sudo mkdir -p /opt/grafana/dashboards
-
-# Copy provisioning files
-sudo cp /scripts/grafana/datasource.yml /opt/grafana/provisioning/datasources/
-sudo cp /scripts/grafana/dashboard.yml /opt/grafana/provisioning/dashboards/
-sudo cp /scripts/grafana/webserver_dashboard.json /opt/grafana/dashboards/
-
 # Create a systemd service file for Grafana
 cat <<EOF | sudo tee /etc/systemd/system/grafana.service
 [Unit]

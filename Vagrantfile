@@ -13,6 +13,7 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       lb.vm.provision "shell", path: "./scripts/loadbalancer/setup_loadbalancer.sh", args: ["#{i}"]
+      lb.vm.provision "shell", path: "./scripts/loadbalancer/setup_nginx_exporter.sh"
     end
   end
 
