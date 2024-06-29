@@ -10,7 +10,7 @@ apt-get install -y nginx
 systemctl enable nginx
 
 # Copy the Nginx configuration file
-cp /vagrant/scripts/nginx.conf /etc/nginx/nginx.conf
+cp /vagrant/scripts/loadbalancer/nginx.conf /etc/nginx/nginx.conf
 
 # Restart Nginx
 systemctl restart nginx
@@ -22,7 +22,7 @@ apt-get install -y keepalived
 touch /etc/keepalived/keepalived.conf
 
 # Copy the Keepalived configuration file
-cp /vagrant/scripts/keepalived.conf /etc/keepalived/keepalived.conf
+cp /vagrant/scripts/loadbalancer/keepalived.conf /etc/keepalived/keepalived.conf
 
 # Replace placeholders in the Keepalived configuration
 if [ "$1" == "1" ]; then
