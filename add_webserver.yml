@@ -1,0 +1,99 @@
+---
+- name: Add new webservers to inventory and update load balancers
+  hosts: localhost
+  tasks:
+    - name: Read current inventory YAML
+      slurp:
+        src: inventory.yml
+      register: inventory_content
+
+    - name: Load current inventory as a fact
+      set_fact:
+        inventory: "{{ inventory_content.content | b64decode | from_yaml }}"
+
+    - name: Find the next webserver number
+      set_fact:
+        next_webserver_number: >-
+          {{
+            (
+              inventory.webservers | map(attribute='name') | map('regex_replace', 'webserver-', '') | map('int') | max
+            ) + 1
+          }}
+
+    - name: Define the new webserver
+      set_fact:
+        new_webserver:
+          name: "webserver-{{ next_webserver_number }}"
+          ip: "192.168.44.{{ next_webserver_number + 10 }}"
+          scripts:
+            - ./scripts/webserver/setup_webserver.sh
+            - ./scripts/prometheus/setup_node_exporter.sh
+
+    - name: Add new webserver to inventory YAML
+      blockinfile:
+        path: inventory.yml
+        block: |
+          - name: "{{ new_webserver.name }}"
+            ip: "{{ new_webserver.ip }}"
+            scripts:
+              - ./scripts/webserver/setup_webserver.sh
+              - ./scripts/prometheus/setup_node_exporter.sh
+        marker: "# {mark} ANSIBLE MANAGED BLOCK webservers"
+        insertafter: "webservers:"
+
+    - name: Generate upstream servers list for Nginx
+      set_fact:
+        nginx_upstream_servers: |
+          {% for webserver in inventory.webservers %}
+            server {{ webserver.ip }};
+          {% endfor %}
+          server {{ new_webserver.ip }};
+
+    - name: Update Nginx config on load balancers
+      block:
+        - name: Update upstream block in nginx.conf on load balancers
+          replace:
+            path: /etc/nginx/nginx.conf
+            regexp: 'upstream myapp {[^}]*}'
+            replace: "upstream myapp { {{ nginx_upstream_servers }} }"
+          delegate_to: "{{ item }}"
+          with_items:
+            - loadbalancer-1
+            - loadbalancer-2
+
+        - name: Reload Nginx on load balancers
+          service:
+            name: nginx
+            state: reloaded
+          delegate_to: "{{ item }}"
+          with_items:
+            - loadbalancer-1
+            - loadbalancer-2
+
+    - name: Generate Prometheus targets list for web servers
+      set_fact:
+        prometheus_targets: |
+          - targets:
+          {% for webserver in inventory.webservers %}
+            - '{{ webserver.ip }}:9100'
+          {% endfor %}
+          - '{{ new_webserver.ip }}:9100'
+
+    - name: Update Prometheus config with new web server
+      blockinfile:
+        path: /opt/prometheus/prometheus.yml
+        block: |
+          - job_name: 'web_servers'
+            static_configs:
+            {{ prometheus_targets }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK web_servers"
+        insertafter: "scrape_configs:"
+
+    - name: Reload Prometheus configuration
+      shell: "pkill -HUP prometheus"
+      ignore_errors: true
+
+    - name: Run Vagrant to update VMs
+      command: vagrant up
+      args:
+        chdir: /path/to/vagrant/project

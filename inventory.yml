@@ -1,0 +1,51 @@
+loadbalancers:
+  - name: loadbalancer-1
+    ip: 192.168.50.10
+    scripts:
+      - ./scripts/loadbalancer/setup_loadbalancer.sh
+      - ./scripts/prometheus/setup_node_exporter.sh
+    args:
+      - "1"
+  - name: loadbalancer-2
+    ip: 192.168.50.20
+    scripts:
+      - ./scripts/loadbalancer/setup_loadbalancer.sh
+      - ./scripts/prometheus/setup_node_exporter.sh
+    args:
+      - "2"
+
+webservers:
+  - name: webserver-1
+    ip: 192.168.44.11
+    scripts:
+      - ./scripts/webserver/setup_webserver.sh
+      - ./scripts/prometheus/setup_node_exporter.sh
+  - name: webserver-2
+    ip: 192.168.44.12
+    scripts:
+      - ./scripts/webserver/setup_webserver.sh
+      - ./scripts/prometheus/setup_node_exporter.sh
+  - name: webserver-3
+    ip: 192.168.44.13
+    scripts:
+      - ./scripts/webserver/setup_webserver.sh
+      - ./scripts/prometheus/setup_node_exporter.sh
+
+redis:
+  - name: redis-server
+    ip: 192.168.44.10
+    scripts:
+      - ./scripts/redis/setup_redis.sh
+      - ./scripts/prometheus/setup_node_exporter.sh
+
+prometheus:
+  - name: prometheus
+    ip: 192.168.44.20
+    scripts:
+      - ./scripts/prometheus/setup_prometheus.sh
+
+grafana:
+  - name: grafana
+    ip: 192.168.44.30
+    scripts:
+      - ./scripts/grafana/setup_grafana.sh
