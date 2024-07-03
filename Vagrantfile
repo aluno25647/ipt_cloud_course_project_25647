@@ -2,6 +2,19 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = "bento/ubuntu-22.04"
 
+  # Consul Server
+  config.vm.define "consul-server" do |consul|
+    consul.vm.hostname = "consul-server"
+    consul.vm.network "private_network", ip: "192.168.50.200"
+    consul.vm.provider "virtualbox" do |v|
+      v.name = "Project_A-consul"
+      v.memory = 1024
+      v.cpus = 1
+    end
+    consul.vm.provision "shell", path: "./scripts/consul/setup_consul.sh"
+    consul.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
+  end
+
   # Load Balancers
   (1..2).each do |i|
     config.vm.define vm_name = "loadbalancer-#{i}" do |lb|
@@ -13,6 +26,7 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       lb.vm.provision "shell", path: "./scripts/loadbalancer/setup_loadbalancer.sh", args: ["#{i}"]
+      lb.vm.provision "shell", path: "./scripts/loadbalancer/register_lb_with_consul.sh", args: ["#{i}"]
       lb.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
     end
   end
@@ -28,6 +42,7 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       ws.vm.provision "shell", path: "./scripts/webserver/setup_webserver.sh"
+      ws.vm.provision "shell", path: "./scripts/webserver/register_webserver_with_consul.sh", args: ["#{i}"]
       ws.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
     end
   end
@@ -42,6 +57,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 1
     end
     redis.vm.provision "shell", path: "./scripts/redis/setup_redis.sh"
+    redis.vm.provision "shell", path: "./scripts/redis/register_redis_with_consul.sh"
     redis.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
   end
 
