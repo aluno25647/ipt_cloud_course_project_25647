@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
   end
 
   # Web Servers
-  (1..3).each do |i|
+  (1..2).each do |i|
     config.vm.define vm_name = "webserver-#{i}" do |ws|
       ws.vm.hostname = vm_name
       ws.vm.network "private_network", ip: "192.168.44.#{i+10}"
@@ -59,6 +59,18 @@ Vagrant.configure("2") do |config|
     redis.vm.provision "shell", path: "./scripts/redis/setup_redis.sh"
     redis.vm.provision "shell", path: "./scripts/redis/register_redis_with_consul.sh"
     redis.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
+  end
+
+  # GlusterFS Server
+  config.vm.define "glusterfs" do |gluster|
+    gluster.vm.hostname = "glusterfs"
+    gluster.vm.network "private_network", ip: "192.168.44.40"
+    gluster.vm.provider "virtualbox" do |v|
+      v.name = "Project_A-glusterfs"
+      v.memory = 1024
+      v.cpus = 2
+    end
+    gluster.vm.provision "shell", path: "./scripts/glusterfs/setup_glusterfs.sh"
   end
 
   # Prometheus Server

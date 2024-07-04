@@ -4,10 +4,11 @@ include '_dotenv.php';
 // Function to handle file upload
 function handleFileUpload($uploadDir)
 {
+    $message = '';
     if (isset($_POST['submit'])) {
         // Check if the upload directory exists, otherwise create it
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir);
+            mkdir($uploadDir, 0775, true);
         }
 
         $fileName = basename($_FILES['image']['name']);
@@ -17,55 +18,74 @@ function handleFileUpload($uploadDir)
         // Check if the uploaded file is a JPG image
         if ($fileType === 'jpg' || $fileType === 'jpeg') {
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                return '<div class="alert alert-success">Image uploaded successfully!</div>';
+                $message = '<div class="alert alert-success">Image uploaded successfully!</div>';
             } else {
-                return '<div class="alert alert-danger">Sorry, there was an error uploading your file.</div>';
+                $message = '<div class="alert alert-danger">Sorry, there was an error uploading your file.</div>';
             }
         } else {
-            return '<div class="alert alert-danger">Please upload a JPG image.</div>';
+            $message = '<div class="alert alert-danger">Please upload a JPG image.</div>';
         }
     }
+    return $message;
 }
 
 // Function to handle clear gallery button click
 function handleClearGallery($imageDir)
 {
+    $message = '';
     if (isset($_POST['clear'])) {
-        // Validate the image directory path to prevent accidental deletion of system files
-        if (strpos(realpath($imageDir), realpath(__DIR__)) === 0) {
-            $images = glob($imageDir . '*.jpg');
+        $images = glob($imageDir . '*.jpg');
 
-            foreach ($images as $image) {
+        foreach ($images as $image) {
+            if (file_exists($image)) {
                 unlink($image); // Delete each image file
             }
-
-            return '<div class="alert alert-success">Gallery cleared successfully!</div>';
-        } else {
-            return '<div class="alert alert-danger">Invalid operation!</div>';
         }
+
+        $message = '<div class="alert alert-success">Gallery cleared successfully!</div>';
     }
+    return $message;
 }
 
 // Function to delete an individual image
 function deleteImage($imagePath)
 {
-    if (isset($_POST['delete'])) {
-        // Validate the image path to prevent accidental deletion of system files
-        if (strpos(realpath($imagePath), realpath(__DIR__)) === 0) {
+    $message = '';
+    if (isset($_POST['deleteBtn'])) {
+        if (file_exists($imagePath)) {
             unlink($imagePath); // Delete the image file
-            return '<div class="alert alert-success">Image deleted successfully!</div>';
+            $message = '<div class="alert alert-success">Image deleted successfully!</div>';
         } else {
-            return '<div class="alert alert-danger">Invalid operation!</div>';
+            $message = '<div class="alert alert-danger">Image not found!</div>';
         }
     }
+    return $message;
 }
 
-$imageDir = 'gallery/';
-$uploadDir = 'gallery/';
+$imageDir = '/mnt/glusterfs/';
+$uploadDir = '/mnt/glusterfs/';
 
-// Call functions to handle file upload, delete image, and clear gallery
-$uploadMessage = handleFileUpload($uploadDir);
-$clearMessage = handleClearGallery($imageDir);
+// Initialize messages
+$uploadMessage = '';
+$clearMessage = '';
+$deleteMessage = '';
+
+// Handle file upload
+if (isset($_POST['submit'])) {
+    $uploadMessage = handleFileUpload($uploadDir);
+}
+
+// Handle clear gallery
+if (isset($_POST['clear'])) {
+    $clearMessage = handleClearGallery($imageDir);
+}
+
+// Handle image deletion
+if (isset($_POST['deleteBtn'])) {
+    $imagePath = $_POST['delete'];
+    $deleteMessage = deleteImage($imagePath);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +110,7 @@ $clearMessage = handleClearGallery($imageDir);
             <!-- Display upload, clear gallery, and delete image messages -->
             <?php echo $uploadMessage; ?>
             <?php echo $clearMessage; ?>
-            <?php echo isset($_POST['delete']) ? deleteImage($_POST['delete']) : ''; ?>
+            <?php echo $deleteMessage; ?>
 
             <div class="row">
                 <div class="col-md-6">
@@ -123,7 +143,7 @@ $clearMessage = handleClearGallery($imageDir);
                     echo '<img src="' . $image . '" class="img-fluid">';
                     echo '<form method="POST" class="mt-2">';
                     echo '<input type="hidden" name="delete" value="' . $image . '">';
-                    echo '<button type="submit" class="btn btn-danger btn-sm">Delete</button>';
+                    echo '<button type="submit" class="btn btn-danger btn-sm" name="deleteBtn">Delete</button>';
                     echo '</form>';
                     echo '</div>';
                 }
