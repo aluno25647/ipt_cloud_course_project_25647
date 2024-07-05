@@ -35,10 +35,10 @@ sudo apt-get install -y nfs-common
 
 echo -e "$MSG_COLOR$(hostname): Mount GlusterFS volume\033[0m"
 sudo mkdir -p /mnt/glusterfs
-sudo mount -t nfs 192.168.44.40:/mnt/glusterfs /mnt/glusterfs
+sudo mount -t nfs 192.168.50.40:/mnt/glusterfs /mnt/glusterfs
 
 # Ensure NFS volume mounts on system reboot
-echo '192.168.44.40:/mnt/glusterfs /mnt/glusterfs nfs defaults,_netdev 0 0' | sudo tee -a /etc/fstab
+echo '192.168.50.40:/mnt/glusterfs /mnt/glusterfs nfs defaults,_netdev 0 0' | sudo tee -a /etc/fstab
 
 # Ensure correct permissions on mounted directory
 sudo chown -R www-data:www-data /mnt/glusterfs
@@ -70,7 +70,7 @@ sed -i "s/^DEPLOY_DATE=.*/DEPLOY_DATE=\"$ISO_DATE\"/" .env
 
 echo -e "$MSG_COLOR$(hostname): Configure PHP session to use Redis\033[0m"
 sudo sed -i 's/^;session.save_handler = files/session.save_handler = redis/' /etc/php/8.1/apache2/php.ini
-sudo sed -i 's/^;session.save_path = "\/var\/lib\/php\/sessions"/session.save_path = "tcp:\/\/192.168.44.10:6379"/' /etc/php/8.1/apache2/php.ini
+sudo sed -i 's/^;session.save_path = "\/var\/lib\/php\/sessions"/session.save_path = "tcp:\/\/192.168.50.30:6379"/' /etc/php/8.1/apache2/php.ini
 
 echo -e "$MSG_COLOR$(hostname): Restart Apache to apply changes\033[0m"
 sudo systemctl restart apache2

@@ -24,9 +24,17 @@ scrape_configs:
         target_label: __address__
         replacement: \${1}:9100
 
-  - job_name: 'redis_server'
+  - job_name: 'sessions-server'
     static_configs:
-      - targets: ['192.168.44.10:9100']
+      - targets: ['192.168.50.30:9100']
+
+  - job_name: 'websockets-server'
+    static_configs:
+      - targets: ['192.168.50.50:9100']
+
+  - job_name: 'glusterfs'
+    static_configs:
+      - targets: ['192.168.50.40:9100']
 
   - job_name: 'consul_server'
     static_configs:
@@ -35,6 +43,10 @@ scrape_configs:
   - job_name: 'nginx_loadbalancers'
     static_configs:
       - targets: ['192.168.50.10:9100', '192.168.50.20:9100']
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['192.168.50.70:9100']
 EOF
 
 # Create the Prometheus service file

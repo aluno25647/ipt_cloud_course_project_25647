@@ -31,6 +31,20 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  # File uploads Server
+  config.vm.define "glusterfs" do |gluster|
+    gluster.vm.hostname = "glusterfs"
+    gluster.vm.network "private_network", ip: "192.168.50.40"
+    gluster.vm.provider "virtualbox" do |v|
+      v.name = "Project_A-glusterfs"
+      v.memory = 1024
+      v.cpus = 2
+    end
+    gluster.vm.provision "shell", path: "./scripts/glusterfs/setup_glusterfs.sh"
+    gluster.vm.provision "shell", path: "./scripts/glusterfs/register_glusterfs_with_consul.sh"
+    gluster.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
+  end
+
   # Web Servers
   (1..2).each do |i|
     config.vm.define vm_name = "webserver-#{i}" do |ws|
@@ -47,36 +61,38 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  # Redis Server
-  config.vm.define "redis-server" do |redis|
-    redis.vm.hostname = "redis-server"
-    redis.vm.network "private_network", ip: "192.168.44.10"
+  # Sessions Server
+  config.vm.define "sessions-server" do |redis|
+    redis.vm.hostname = "sessions-server"
+    redis.vm.network "private_network", ip: "192.168.50.30"
     redis.vm.provider "virtualbox" do |v|
-      v.name = "Project_A-redis"
+      v.name = "Project_A-sessions"
       v.memory = 1024
       v.cpus = 1
     end
-    redis.vm.provision "shell", path: "./scripts/redis/setup_redis.sh"
-    redis.vm.provision "shell", path: "./scripts/redis/register_redis_with_consul.sh"
+    redis.vm.provision "shell", path: "./scripts/sessions/setup_redis.sh"
+    redis.vm.provision "shell", path: "./scripts/sessions/register_sessions_with_consul.sh"
     redis.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
   end
 
-  # GlusterFS Server
-  config.vm.define "glusterfs" do |gluster|
-    gluster.vm.hostname = "glusterfs"
-    gluster.vm.network "private_network", ip: "192.168.44.40"
-    gluster.vm.provider "virtualbox" do |v|
-      v.name = "Project_A-glusterfs"
+  # WebSockets Server
+  config.vm.define "websockets-server" do |websockets|
+    websockets.vm.hostname = "websockets-server"
+    websockets.vm.network "private_network", ip: "192.168.50.50"
+    websockets.vm.provider "virtualbox" do |v|
+      v.name = "Project_A-websockets"
       v.memory = 1024
-      v.cpus = 2
+      v.cpus = 1
     end
-    gluster.vm.provision "shell", path: "./scripts/glusterfs/setup_glusterfs.sh"
+    websockets.vm.provision "shell", path: "./scripts/websockets/setup_websockets.sh"
+    websockets.vm.provision "shell", path: "./scripts/websockets/register_websockets_with_consul.sh"
+    websockets.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
   end
 
   # Prometheus Server
   config.vm.define "prometheus" do |prom|
     prom.vm.hostname = "prometheus"
-    prom.vm.network "private_network", ip: "192.168.44.20"
+    prom.vm.network "private_network", ip: "192.168.50.60"
     prom.vm.provider "virtualbox" do |v|
       v.name = "Project_A-prometheus"
       v.memory = 1048
@@ -88,13 +104,14 @@ Vagrant.configure("2") do |config|
   # Grafana Server
   config.vm.define "grafana" do |grafana|
     grafana.vm.hostname = "grafana"
-    grafana.vm.network "private_network", ip: "192.168.44.30"
+    grafana.vm.network "private_network", ip: "192.168.50.70"
     grafana.vm.provider "virtualbox" do |v|
       v.name = "Project_A-grafana"
       v.memory = 1048
       v.cpus = 2
     end
     grafana.vm.provision "shell", path: "./scripts/grafana/setup_grafana.sh"
+    grafana.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
   end
 
 end

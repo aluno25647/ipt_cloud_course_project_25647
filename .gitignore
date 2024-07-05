@@ -82,3 +82,19 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/vagrant,composer,visualstudiocode,windows,linux
+websocket-app/composer.json
+websocket-app/composer.lock
+websocket-app/websocket-server.php
+websocket-app/vendor/autoload.php
+websocket-app/vendor/composer/autoload_classmap.php
+websocket-app/vendor/composer/autoload_files.php
+websocket-app/vendor/composer/autoload_namespaces.php
+websocket-app/vendor/composer/autoload_psr4.php
+websocket-app/vendor/composer/autoload_real.php
+websocket-app/vendor/composer/autoload_static.php
+websocket-app/vendor/composer/ClassLoader.php
+websocket-app/vendor/composer/installed.json
+websocket-app/vendor/composer/installed.php
+websocket-app/vendor/composer/InstalledVersions.php
+websocket-app/vendor/composer/LICENSE
+websocket-app/vendor/composer/platform_check.php
