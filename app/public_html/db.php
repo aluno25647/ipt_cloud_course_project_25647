@@ -5,7 +5,9 @@ include '_dotenv.php';
 function connectToDatabase($db_host, $db_port, $db_name, $db_user, $db_pass)
 {
     try {
-        return new PDO("pgsql:host=$db_host;port=$db_port;dbname=$db_name", $db_user, $db_pass);
+        return new PDO("pgsql:host=$db_host;port=$db_port;dbname=$db_name", $db_user, $db_pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]);
     } catch (PDOException $e) {
         die("Error: " . $e->getMessage());
     }
@@ -18,9 +20,11 @@ function truncateTable($pdo)
         try {
             // Truncate the table
             $pdo->exec('TRUNCATE TABLE messages');
-            return '<div class="alert alert-success">Table truncated successfully!</div>';
+            header("Location: " . $_SERVER['PHP_SELF'] . "?truncate=success");
+            exit();
         } catch (PDOException $e) {
-            return '<div class="alert alert-danger">Error: ' . $e->getMessage() . '</div>';
+            header("Location: " . $_SERVER['PHP_SELF'] . "?truncate=error");
+            exit();
         }
     }
 }
@@ -32,11 +36,16 @@ function handleMessageInsertion($pdo)
         $message = $_POST['message'];
         $escapedInput = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
-        // Insert the message into the database
-        $stmt = $pdo->prepare("INSERT INTO messages (message) VALUES (?)");
-        $stmt->execute([$escapedInput]);
-
-        return '<div class="alert alert-success">Message added successfully!</div>';
+        try {
+            // Insert the message into the database
+            $stmt = $pdo->prepare("INSERT INTO messages (message) VALUES (?)");
+            $stmt->execute([$escapedInput]);
+            header("Location: " . $_SERVER['PHP_SELF'] . "?insert=success");
+            exit();
+        } catch (PDOException $e) {
+            header("Location: " . $_SERVER['PHP_SELF'] . "?insert=error");
+            exit();
+        }
     }
 }
 
@@ -46,11 +55,16 @@ function deleteMessage($pdo)
     if (isset($_POST['delete'])) {
         $id = $_POST['message_id'];
 
-        // Delete the message from the database
-        $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
-        $stmt->execute([$id]);
-
-        return '<div class="alert alert-success">Message deleted successfully!</div>';
+        try {
+            // Delete the message from the database
+            $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ?");
+            $stmt->execute([$id]);
+            header("Location: " . $_SERVER['PHP_SELF'] . "?delete=success");
+            exit();
+        } catch (PDOException $e) {
+            header("Location: " . $_SERVER['PHP_SELF'] . "?delete=error");
+            exit();
+        }
     }
 }
 
@@ -63,10 +77,22 @@ function fetchMessages($pdo)
 
 $pdo = connectToDatabase($db_host, $db_port, $db_name, $db_user, $db_pass);
 
-$truncateMessage = truncateTable($pdo);
-$insertMessage = handleMessageInsertion($pdo);
-$deleteMessage = deleteMessage($pdo);
+truncateTable($pdo);
+handleMessageInsertion($pdo);
+deleteMessage($pdo);
 $messages = fetchMessages($pdo);
+
+// Handling alerts
+$alertMessage = '';
+if (isset($_GET['truncate'])) {
+    $alertMessage = $_GET['truncate'] === 'success' ? '<div class="alert alert-success">Table truncated successfully!</div>' : '<div class="alert alert-danger">Error truncating table!</div>';
+}
+if (isset($_GET['insert'])) {
+    $alertMessage = $_GET['insert'] === 'success' ? '<div class="alert alert-success">Message added successfully!</div>' : '<div class="alert alert-danger">Error adding message!</div>';
+}
+if (isset($_GET['delete'])) {
+    $alertMessage = $_GET['delete'] === 'success' ? '<div class="alert alert-success">Message deleted successfully!</div>' : '<div class="alert alert-danger">Error deleting message!</div>';
+}
 ?>
 
 <!DOCTYPE html>
@@ -88,10 +114,8 @@ $messages = fetchMessages($pdo);
         <div class="container mt-5">
             <h1 class="text-center">Message Board</h1>
 
-            <!-- Display message insertion and truncation messages -->
-            <?php echo $insertMessage; ?>
-            <?php echo $truncateMessage; ?>
-            <?php echo $deleteMessage; ?>
+            <!-- Display alert messages -->
+            <?php echo $alertMessage; ?>
 
             <!-- Display messages table -->
             <?php if (!empty($messages)): ?>
@@ -101,7 +125,7 @@ $messages = fetchMessages($pdo);
                             <th scope="col">ID</th>
                             <th scope="col">Message</th>
                             <th scope="col">Created At</th>
-                            <th scope="col">Actions</th> <!-- Added Actions column -->
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">

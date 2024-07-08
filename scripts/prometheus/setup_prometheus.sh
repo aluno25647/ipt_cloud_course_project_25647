@@ -32,10 +32,10 @@ scrape_configs:
     static_configs:
       - targets: ['192.168.50.50:9100']
 
-  - job_name: 'glusterfs'
+  - job_name: 'database-server'
     static_configs:
-      - targets: ['192.168.50.40:9100']
-
+      - targets: ['192.168.50.80:9100']
+      
   - job_name: 'consul_server'
     static_configs:
       - targets: ['192.168.50.200:9100']
