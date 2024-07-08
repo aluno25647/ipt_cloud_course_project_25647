@@ -31,20 +31,6 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  # File uploads Server
-  config.vm.define "glusterfs" do |gluster|
-    gluster.vm.hostname = "glusterfs"
-    gluster.vm.network "private_network", ip: "192.168.50.40"
-    gluster.vm.provider "virtualbox" do |v|
-      v.name = "Project_A-glusterfs"
-      v.memory = 1024
-      v.cpus = 2
-    end
-    gluster.vm.provision "shell", path: "./scripts/glusterfs/setup_glusterfs.sh"
-    gluster.vm.provision "shell", path: "./scripts/glusterfs/register_glusterfs_with_consul.sh"
-    gluster.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
-  end
-
   # Web Servers
   (1..2).each do |i|
     config.vm.define vm_name = "webserver-#{i}" do |ws|
@@ -56,6 +42,7 @@ Vagrant.configure("2") do |config|
         v.cpus = 2
       end
       ws.vm.provision "shell", path: "./scripts/webserver/setup_webserver.sh"
+      ws.vm.provision "shell", path: "./scripts/webserver/setup_glusterfs.sh"
       ws.vm.provision "shell", path: "./scripts/webserver/register_webserver_with_consul.sh", args: ["#{i}"]
       ws.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
     end
