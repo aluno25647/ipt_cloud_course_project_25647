@@ -58,6 +58,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
     end
     db.vm.provision "shell", path: "./scripts/db/setup_postgresql.sh"
+    db.vm.provision "shell", path: "./scripts/db/register_database_with_consul.sh"
     db.vm.provision "shell", path: "./scripts/prometheus/setup_node_exporter.sh"
   end
 
