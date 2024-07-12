@@ -1,0 +1,134 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: traefik:v2.5
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Traefik dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - net
+      - monitoring
+
+  web:
+    image: aluno25647/ipt-cloud-web:latest
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`web.localhost`)"
+      - "traefik.http.services.web.loadbalancer.server.port=80"
+    networks:
+      - net
+    volumes:
+      - glusterfs-vol:/mnt/data
+
+  websockets:
+    image: aluno25647/ipt-cloud-ws:latest
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.websockets.rule=Host(`ws.localhost`)"
+      - "traefik.http.services.websockets.loadbalancer.server.port=8080"
+    networks:
+      - net
+
+  redis:
+    image: redis:alpine
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - redis-data:/data
+    networks:
+      - net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
+      - "traefik.http.services.redis.loadbalancer.server.port=6379"
+
+  glusterfs:
+    image: gluster/gluster-centos
+    deploy:
+      mode: global
+    volumes:
+      - glusterfs-vol:/mnt/data
+    networks:
+      - net
+
+  prometheus:
+    image: prom/prometheus
+    deploy:
+      replicas: 1
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus-data:/prometheus
+    networks:
+      - monitoring
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+
+  grafana:
+    image: grafana/grafana
+    deploy:
+      replicas: 1
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  portainer:
+    image: portainer/portainer-ce
+    deploy:
+      replicas: 1
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - net
+      - monitoring
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+networks:
+  net:
+  monitoring:
+
+volumes:
+  redis-data:
+  glusterfs-vol:
+    driver: glusterfs
+  prometheus-data:
+  portainer_data:
