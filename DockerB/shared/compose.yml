@@ -19,7 +19,7 @@ services:
       - monitoring
 
   web:
-    image: aluno25647/ipt-cloud-web:latest
+    image: aluno25647/ipt-cloud-web:V1.3
     deploy:
       replicas: 3
       update_config:
@@ -124,6 +124,7 @@ services:
 
 networks:
   net:
+    driver: overlay
   monitoring:
 
 volumes:
