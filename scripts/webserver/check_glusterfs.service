@@ -1,0 +1,5 @@
+[Unit]
+Description=Check and Reconfigure GlusterFS
+
+[Service]
+ExecStart=/usr/local/bin/configure_glusterfs.sh

@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Definindo cores para mensagens
+MSG_COLOR="\033[41m"  # Cor de fundo vermelha para mensagens
+NC="\033[0m"          # Resetar formatação de cor
+
+# Mensagem informando que o serviço está sendo registrado
+echo -e "${MSG_COLOR}$(hostname): Registrando o serviço de websockets no Consul${NC}"
+
+# Envia uma requisição PUT com dados para registrar o serviço no Consul
 curl --request PUT --data @- http://192.168.50.200:8500/v1/agent/service/register <<EOF
 {
   "ID": "websockets-server",
@@ -14,4 +22,5 @@ curl --request PUT --data @- http://192.168.50.200:8500/v1/agent/service/registe
 }
 EOF
 
-echo "Websockets server service registered in Consul."
+# Mensagem indicando que o serviço de websockets foi registrado no Consul
+echo -e "${MSG_COLOR}$(hostname): Serviço de websockets registrado no Consul.${NC}"

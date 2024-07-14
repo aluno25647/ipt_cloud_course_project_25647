@@ -1,6 +1,12 @@
 #!/bin/bash
 
-echo "Installing Consul..."
+# Color variables
+MSG_COLOR="\033[1;34m"  # Blue color for messages
+ERROR_COLOR="\033[1;31m"  # Red color for errors
+RESET_COLOR="\033[0m"  # Reset color
+
+# Display installation message
+echo -e "${MSG_COLOR}Installing Consul...${RESET_COLOR}"
 
 # Variables
 CONSUL_VERSION="1.11.4"
@@ -10,16 +16,20 @@ CONSUL_BIN="/usr/local/bin/consul"
 
 # Install unzip if not installed
 if ! command -v unzip &> /dev/null; then
+  echo -e "${MSG_COLOR}Installing unzip...${RESET_COLOR}"
   sudo apt-get update
   sudo apt-get install -y unzip
 fi
 
-# Download and install Consul
+# Download Consul if not already downloaded
 if [ ! -f "${CONSUL_ZIP}" ]; then
+  echo -e "${MSG_COLOR}Downloading Consul ${CONSUL_VERSION}...${RESET_COLOR}"
   wget "${CONSUL_URL}"
 fi
 
+# Install Consul if not already installed
 if [ ! -f "${CONSUL_BIN}" ]; then
+  echo -e "${MSG_COLOR}Installing Consul ${CONSUL_VERSION}...${RESET_COLOR}"
   unzip "${CONSUL_ZIP}"
   sudo mv consul "${CONSUL_BIN}"
   rm "${CONSUL_ZIP}"
@@ -27,13 +37,15 @@ fi
 
 # Create Consul user and directories
 if ! id -u consul > /dev/null 2>&1; then
+  echo -e "${MSG_COLOR}Creating Consul user...${RESET_COLOR}"
   sudo useradd --system --home /etc/consul.d --shell /bin/false consul
 fi
 
-sudo mkdir --parents /opt/consul /etc/consul.d
-sudo chown --recursive consul:consul /opt/consul /etc/consul.d
+sudo mkdir -p /opt/consul /etc/consul.d
+sudo chown -R consul:consul /opt/consul /etc/consul.d
 
 # Create Consul configuration file
+echo -e "${MSG_COLOR}Creating Consul configuration file...${RESET_COLOR}"
 sudo tee /etc/consul.d/consul.hcl > /dev/null <<EOF
 datacenter = "dc1"
 data_dir = "/opt/consul"
@@ -47,6 +59,7 @@ bootstrap_expect = 1
 EOF
 
 # Create Consul service
+echo -e "${MSG_COLOR}Creating Consul service...${RESET_COLOR}"
 sudo tee /etc/systemd/system/consul.service > /dev/null <<EOF
 [Unit]
 Description=Consul Agent
@@ -68,13 +81,18 @@ WantedBy=multi-user.target
 EOF
 
 # Reload systemd, enable and start Consul service
+echo -e "${MSG_COLOR}Reloading systemd...${RESET_COLOR}"
 sudo systemctl daemon-reload
+
+echo -e "${MSG_COLOR}Enabling Consul service...${RESET_COLOR}"
 sudo systemctl enable consul
+
+echo -e "${MSG_COLOR}Starting Consul service...${RESET_COLOR}"
 sudo systemctl start consul
 
 # Check if Consul service is running
-if sudo systemctl status consul | grep "active (running)" > /dev/null 2>&1; then
-  echo "Consul installation and setup complete."
+if sudo systemctl is-active --quiet consul; then
+  echo -e "${MSG_COLOR}Consul installation and setup complete.${RESET_COLOR}"
 else
-  echo "Consul failed to start. Check the logs for more details."
+  echo -e "${ERROR_COLOR}Consul failed to start. Check the logs for more details.${RESET_COLOR}"
 fi
