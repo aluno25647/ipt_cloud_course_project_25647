@@ -6,7 +6,6 @@ NC="\033[0m"            # No Color
 
 configure_glusterfs() {
     echo -e "${MSG_COLOR}$(hostname): Configuring GlusterFS${NC}"
-    sudo apt-get update
     sudo apt-get install -y glusterfs-server
 
     echo -e "${MSG_COLOR}$(hostname): Starting GlusterFS${NC}"

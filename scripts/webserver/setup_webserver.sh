@@ -44,10 +44,10 @@ cd ~
 curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
 sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-# Mensagem de instalação de dependências para o servidor de websockets
-echo -e "${MSG_COLOR}$(hostname): Install dependencies for websockets server${NC}"
-cd /vagrant/ws
-sudo -u vagrant bash -c 'composer install'
+# # Mensagem de instalação de dependências para o servidor de websockets
+# echo -e "${MSG_COLOR}$(hostname): Install dependencies for websockets server${NC}"
+# cd /vagrant/ws
+# sudo -u vagrant bash -c 'composer install'
 
 # Mensagem de instalação de dependências para a aplicação web
 echo -e "${MSG_COLOR}$(hostname): Install dependencies for webapp${NC}"
