@@ -1,4 +1,4 @@
-# Project A
+# Projeto A
 
 Mestrado em Engenharia Informática – IoT
 
@@ -8,6 +8,9 @@ Luís Costa – n.º 25647 /
 Paulo Peixoto – n.º 26097 /
 Ricardo Elisiário – n.º 26534
 
+## Projeto B
+
+https://github.com/aluno25647/ipt_cloud_course_project_25647_26097_26534_PartB
 
 ## Descrição
 
